@@ -9,6 +9,9 @@ func (app *api) getRoutes() http.Handler {
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
 	mux.HandleFunc("/", app.home)
-
+	mux.HandleFunc("/api/v1.0/random", app.randomNumber)
+	mux.HandleFunc("/api/v1.0/random/", app.randomNumber)
+	mux.HandleFunc("/api/v1.0/randomnumber/", app.randomNumber)
+	mux.HandleFunc("/api/v1.0/randomnumber", app.randomNumber)
 	return setSecureHeaders(mux)
 }
