@@ -50,7 +50,10 @@ func (rr *RedditRandom) getSeeds() ([]int, error) {
 			return nil, errors.New("error reading body to retrieve new seeds")
 		}
 		var comments redditcomment
-		json.Unmarshal(bodyBytes, &comments)
+		err = json.Unmarshal(bodyBytes, &comments)
+		if err != nil {
+			return nil, errors.New("error linearizing json")
+		}
 		var seeds []int
 		for i := 0; i < len(comments.Data.Children); i++ {
 			seeds = append(seeds, getHash(comments.Data.Children[i].Data.Body))
@@ -63,7 +66,10 @@ func (rr *RedditRandom) getSeeds() ([]int, error) {
 var fnvHash = fnv.New32a()
 
 func getHash(s string) int {
-	fnvHash.Write([]byte(s))
+	_, err := fnvHash.Write([]byte(s))
+	if err != nil {
+		return 0
+	}
 	defer fnvHash.Reset()
 	return int(fnvHash.Sum32())
 }
