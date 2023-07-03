@@ -12,7 +12,7 @@ func (app *api) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("Hello from Snippetbox"))
+	w.Write([]byte("Hello from random API"))
 }
 
 func (app *api) randomNumber(w http.ResponseWriter, r *http.Request) {
@@ -36,5 +36,9 @@ func (app *api) randomNumber(w http.ResponseWriter, r *http.Request) {
 	for i := 0; i < count; i++ {
 		numbers = append(numbers, rand.Intn(max-min)+min)
 	}
-	writeJSON(w, numbers)
+	err = writeJSON(w, numbers)
+	if err != nil {
+		app.log.LogWarn("Unable to serialize JSON object")
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
