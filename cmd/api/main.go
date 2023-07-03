@@ -2,16 +2,20 @@ package main
 
 import (
 	"flag"
-	"log"
+	"github.com/jameskozlowski/randomnumberapi-go/internal/logger"
 	"net/http"
 )
 
 func main() {
 
 	addr := flag.String("addr", ":4000", "HTTP network address")
-
-	mux := getRoutes()
-	log.Print("Starting server on :4000")
+	log := logger.Logger{}
+	log.Init()
+	app := &api{
+		log: log,
+	}
+	mux := app.getRoutes()
+	log.LogInfo("Starting server on :4000")
 	err := http.ListenAndServe(*addr, mux)
-	log.Fatal(err)
+	log.LogFatal(err)
 }
