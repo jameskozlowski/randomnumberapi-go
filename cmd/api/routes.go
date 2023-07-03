@@ -19,5 +19,7 @@ func (app *api) getRoutes() http.Handler {
 	mux.HandleFunc("/api/v1.0/randomuuid/", app.randomUUID)
 	mux.HandleFunc("/api/v1.0/randomstring", app.randomString)
 	mux.HandleFunc("/api/v1.0/randomstring/", app.randomString)
+	mux.HandleFunc("/api/v1.0/randomredditnumber", app.randomRedditNumber)
+	mux.HandleFunc("/api/v1.0/randomredditnumber/", app.randomRedditNumber)
 	return setSecureHeaders(mux)
 }

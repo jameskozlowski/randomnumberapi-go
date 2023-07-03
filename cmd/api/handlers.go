@@ -97,3 +97,38 @@ func (app *api) randomString(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
+
+func (app *api) randomRedditNumber(w http.ResponseWriter, r *http.Request) {
+
+	count, err := strconv.Atoi(r.URL.Query().Get("count"))
+	if err != nil || count < 1 || count > 100 {
+		count = 1
+	}
+
+	min, err := strconv.Atoi(r.URL.Query().Get("min"))
+	if err != nil || min < 0 {
+		min = 0
+	}
+
+	max, err := strconv.Atoi(r.URL.Query().Get("max"))
+	if err != nil || max <= min {
+		max = min + 100
+	}
+
+	var numbers []int
+	for i := 0; i < count; i++ {
+		rr, err := app.redditrand.Intn(max - min)
+		if err != nil {
+			app.log.LogErrorMessage("Unable to get reddit random")
+			app.log.LogError(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		numbers = append(numbers, rr+min)
+	}
+
+	err = writeJSON(w, numbers)
+	if err != nil {
+		app.log.LogWarn("Unable to serialize JSON object")
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
