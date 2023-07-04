@@ -5,7 +5,6 @@ body {
     line-height: 1.4285;
     letter-spacing: 1px;
     font-weight: 100;
-    line-height: 1.4285;
 }
 
 .well {
@@ -30,7 +29,6 @@ body {
 }
 
 .panel-success {
-    border-color: #d6e9c6;
     border: 1px solid #d6e9c6 ;
 }
 
@@ -45,7 +43,6 @@ body {
 }
 
 .panel-info {
-    border-color: #bce8f1;
     border: 1px solid #bce8f1 ;
 }
 
