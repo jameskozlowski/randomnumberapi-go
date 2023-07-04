@@ -27,7 +27,7 @@ go run ./cmd/api >>/tmp/info.log 2>>/tmp/error.log
 ### Build
 From the root of the project
 ```
-sudo podman build  ./docker/Dockerfile . -t radmonnumberapi
+sudo podman build -f ./docker/Dockerfile . -t radmonnumberapi
 ```
 
 ### Run
