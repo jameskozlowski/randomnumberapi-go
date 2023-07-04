@@ -7,15 +7,6 @@ import (
 	"strconv"
 )
 
-func (app *api) home(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		http.NotFound(w, r)
-		return
-	}
-
-	w.Write([]byte("Hello from random API"))
-}
-
 func (app *api) randomNumber(w http.ResponseWriter, r *http.Request) {
 
 	count, err := strconv.Atoi(r.URL.Query().Get("count"))

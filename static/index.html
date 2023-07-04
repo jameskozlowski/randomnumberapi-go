@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Random Number API</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link href="apipage.css" rel="stylesheet" >
+
+</head>
+<body>
+<!-- github ribbon -->
+<a href="https://github.com/jameskozlowski/randomnumberapi-go">
+    <img class="github-fork" decoding="async" loading="lazy" width="149" height="149" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_orange_ff7600.png?resize=149%2C149" class="attachment-full size-full" alt="Fork me on GitHub" data-recalc-dims="1">
+</a>
+
+<!-- main page -->
+<div class="container">
+    <BR><BR>
+    <h1>Random Number API</h1>
+    <BR><BR>
+    This is a simple api to generate random numbers, random strings and UUID's. This project was built using GO and
+    an be found on <a href="https://github.com/jameskozlowski/randomnumberapi-go">github</a>
+    <BR><BR>
+    <div class="alert alert-danger" role="alert">
+        <B>Warnning: </b>
+        This API uses GO's random functions.
+        The Reddit random function <strong>does</strong> use the GO random function seeded by reddit comments.
+        <BR/>This has not been tested for and should not be used for secure cryptographic purposes
+    </div>
+    <BR>
+
+    <div class="panel panel-success">
+        <div class="panel-heading"><B>Request format</B></div>
+        <div class="panel-body">
+            All requests are GET requests.<BR>
+            Options should be set using url parameters
+            <BR><BR>
+            <B>CURL</B>
+            <div class="well">
+                curl "http://www.randomnumberapi.com/api/v1.0/random?min=100&max=1000&count=5"
+            </div>
+            <b>Response:</b>
+            <div class="well">[684, 434, 864, 261, 375]</div>
+        </div>
+    </div>
+
+    <!-- Random Number -->
+    <div class="panel panel-info">
+        <div class="panel-heading"><B>Get a random number</B></div>
+        <div class="panel-body">
+            <b>URL</b><BR>
+            http://www.randomnumberapi.com/api/v1.0/random<BR>
+            http://www.randomnumberapi.com/api/v1.0/randomnumber<BR><BR>
+
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th scope="col">Option</th>
+                    <th scope="col">Discription</th>
+                    <th scope="col"><span class="label-default">Default</span></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <th scope="row">min</th>
+                    <td>the minumum random number</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <th scope="row">max</th>
+                    <td>the maximum random number</td>
+                    <td>100</td>
+                </tr>
+                <tr>
+                    <th scope="row">count</th>
+                    <td>the number of random numbers to generate (Maximum of 100)</td>
+                    <td>1</td>
+                </tr>
+                </tbody>
+
+            </table>
+            <b>Example</b><BR>
+            <div class="well">
+                http://www.randomnumberapi.com/api/v1.0/random?min=100&max=1000&count=5
+            </div>
+            <b>Response:</b><BR>
+            <div class="well">
+                [389, 741, 959, 754, 916]
+            </div>
+        </div>
+    </div>
+    <!-- End of Random Number -->
+
+    <!-- Random reddit Number -->
+    <div class="panel panel-info">
+        <div class="panel-heading"><B>Get a random number using the reddit comment feed as the seed</B></div>
+        <div class="panel-body">
+            <b>URL</b><BR>
+            http://www.randomnumberapi.com/api/v1.0/randomredditnumber<BR><BR>
+            <strong>Notes</strong><BR>This function uses the latest comments submitted to reddit as the seed for each number.
+            So if you request 100 numbers 100 seeds will be generated from comments and a unique seed used for each number.
+            The Idea behind this function is to generate random numbersbased on the "Free Will" of people generating
+            truly random numbers.<BR><BR>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th scope="col">Option</th>
+                    <th scope="col">Discription</th>
+                    <th scope="col"><span class="label-default">Default</span></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <th scope="row">min</th>
+                    <td>the minumum random number</td>
+                    <td>0</td>
+                </tr>
+                <tr>
+                    <th scope="row">max</th>
+                    <td>the maximum random number</td>
+                    <td>100</td>
+                </tr>
+                <tr>
+                    <th scope="row">count</th>
+                    <td>the number of random numbers to generate (Maximum of 100)</td>
+                    <td>1</td>
+                </tr>
+                </tbody>
+
+            </table>
+            <b>Example</b><BR>
+            <div class="well">
+                http://www.randomnumberapi.com/api/v1.0/randomredditnumber?min=100&max=1000&count=5
+            </div>
+            <b>Response:</b><BR>
+            <div class="well">
+                [389, 741, 959, 754, 916]
+            </div>
+        </div>
+    </div>
+    <!-- End of Reddit Random Number -->
+
+    <!-- Random String -->
+    <div class="panel panel-info">
+        <div class="panel-heading"><B>Get a random string</B></div>
+        <div class="panel-body">
+            <b>URL</b><BR>
+            http://www.randomnumberapi.com/api/v1.0/randomstring<BR><BR>
+
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th scope="col">Option</th>
+                    <th scope="col">Discription</th>
+                    <th scope="col"><span class="label-default">Default</span></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <th scope="row">min</th>
+                    <td>the minumum number of chars in the string (Max 1000)</td>
+                    <td>10</td>
+                </tr>
+                <tr>
+                    <th scope="row">max</th>
+                    <td>the maximum number of chars in the string (Max 1000)</td>
+                    <td>20</td>
+                </tr>
+                <tr>
+                    <th scope="row">count</th>
+                    <td>the number of random strings to generate (Maximum of 100)</td>
+                    <td>1</td>
+                </tr>
+                <tr>
+                    <th scope="row">all</th>
+                    <td>Include numbers and symbols (True/False)</td>
+                    <td>False</td>
+                </tr>
+                </tbody>
+
+            </table>
+            <b>Example</b><BR>
+            <div class="well">
+                http://www.randomnumberapi.com/api/v1.0/randomstring?min=5&max=20&count=5
+            </div>
+            <b>Response:</b><BR>
+            <div class="well">
+                ["sMierZwjgeBTS", "JsGdgIaBQvKpZKA", "qBhFRSfVEzLmeyV", "sehXFM", "DbGuP"]
+            </div>
+        </div>
+    </div>
+    <!-- End of Random Number -->
+
+    <!-- Random UUID -->
+    <div class="panel panel-info">
+        <div class="panel-heading"><B>Get a random UUID</B></div>
+        <div class="panel-body">
+            <b>URL</b><BR>
+            http://www.randomnumberapi.com/api/v1.0/uuid<BR>
+            http://www.randomnumberapi.com/api/v1.0/randomuuid<BR><BR>
+
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th scope="col">Option</th>
+                    <th scope="col">Discription</th>
+                    <th scope="col"><span class="label-default">Default</span></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <th scope="row">count</th>
+                    <td>the number of random numbers to generate (Maximum of 100)</td>
+                    <td>1</td>
+                </tr>
+                </tbody>
+
+            </table>
+            <b>Example</b><BR>
+            <div class="well">
+                www.randomnumberapi.com/api/v1.0/uuid?count=2
+            </div>
+            <b>Response:</b><BR>
+            <div class="well">
+                ["333d69ac79cf455abaf1c7eeb76327bb", "7087d9a779e84df19b06c37202bc285d"]
+            </div>
+        </div>
+    </div>
+    <!-- End of Random UUID -->
+    <BR>
+
+    <HR>
+    Copyright 2023;
+    James Kozlowski
+    <BR><BR>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+</body>
+</html>
