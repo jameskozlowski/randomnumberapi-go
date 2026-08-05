@@ -6,7 +6,7 @@ This is a simple api to generate random numbers, random strings and UUID's. This
 One of the features of this API is to use reddit comments as seeds, to generate what I am calling a "free-will" seed. 
 The thought behind this, is that if you believe in free will, then this seed should be random and unable to predict
 
-## Warnning
+## Warning
 This API uses GO's random functions.
 The Reddit random function does use the GO random function seeded by reddit comments.
 <BR>This has not been tested for and should not be used for secure cryptographic purposes
@@ -33,6 +33,17 @@ sudo podman build -f ./docker/Dockerfile . -t radmonnumberapi
 ### Run
 ```
 sudo podman run -d --rm -p 4000:4000 radmonnumberapi
+```
+
+## If you use Docker
+
+### Build
+```
+docker build -f ./docker/Dockerfile . -t radmonnumberapi
+```
+### Run
+```
+docker run -d --rm -p 4000:4000 radmonnumberapi
 ```
 
 ## Dependencies
