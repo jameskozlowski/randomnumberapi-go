@@ -13,11 +13,25 @@ go run ./cmd/api -addr 127.0.0.1:4000
 The default address is `:4000`. The address flag is parsed at startup. Logs are JSON on stdout; each request has an `X-Request-ID` response header and a log entry with method, route, status, duration, and request ID. Errors include their underlying cause only in server logs, not in API responses.
 
 ```sh
-docker build -f docker/Dockerfile -t randomnumberapi .
+docker build -t randomnumberapi .
 docker run --rm -p 4000:4000 randomnumberapi
 ```
 
 The container uses a non-root, minimal runtime image and serves the static API page at `/`. Page examples use the browser's current origin: `https://www.randomnumberapi.com` when hosted there and the local host/port when running locally. The hosted address is present in the HTML as a fallback without JavaScript. `GET /healthz` returns 204 when the HTTP process is serving; it does not test Bluesky availability. SIGINT/SIGTERM starts graceful shutdown. The server limits request/header, response, and idle time; Bluesky fetches have a five-second timeout and respect request cancellation.
+
+## Deploy to Cloud Run
+
+Install `just` and the Google Cloud CLI, authenticate with `gcloud auth login`, and ensure the account has permission to build and deploy in project `random-number-api-509815`. The project needs billing and the Cloud Run, Cloud Build, and Artifact Registry APIs enabled. From the repository root:
+
+```sh
+just deploy
+```
+
+This deploys the public `random-number-api` service to `us-central1` using the root Dockerfile, without changing your active `gcloud` project. It sets the container port to 4000, matching the API's default listening address. If an existing service uses another name or region, pass both explicitly to update that service rather than creating one in the defaults:
+
+```sh
+just deploy existing-service us-east1
+```
 
 ## API
 
