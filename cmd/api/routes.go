@@ -20,7 +20,7 @@ func (app *api) getRoutes() http.Handler {
 	mux.HandleFunc("GET /api/v1.0/randomuuid/", app.randomUUID)
 	mux.HandleFunc("GET /api/v1.0/randomstring", app.randomString)
 	mux.HandleFunc("GET /api/v1.0/randomstring/", app.randomString)
-	mux.HandleFunc("GET /api/v1.0/randomredditnumber", app.randomRedditNumber)
-	mux.HandleFunc("GET /api/v1.0/randomredditnumber/", app.randomRedditNumber)
+	mux.HandleFunc("GET /api/v1.0/randomblueskynumber", app.randomBlueskyNumber)
+	mux.HandleFunc("GET /api/v1.0/randomblueskynumber/", app.randomBlueskyNumber)
 	return app.logRequests(setSecureHeaders(mux))
 }

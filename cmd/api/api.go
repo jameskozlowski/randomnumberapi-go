@@ -4,12 +4,12 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/jameskozlowski/randomnumberapi-go/internal/redditrandom"
+	"github.com/jameskozlowski/randomnumberapi-go/internal/blueskyrandom"
 )
 
 type api struct {
-	log        *slog.Logger
-	redditrand *redditrandom.RedditRandom
+	log         *slog.Logger
+	blueskyrand *blueskyrandom.BlueskyRandom
 }
 
 func (app *api) respond(w http.ResponseWriter, r *http.Request, data any) {

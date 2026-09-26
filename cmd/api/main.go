@@ -12,7 +12,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/jameskozlowski/randomnumberapi-go/internal/redditrandom"
+	"github.com/jameskozlowski/randomnumberapi-go/internal/blueskyrandom"
 )
 
 func main() {
@@ -28,8 +28,8 @@ func run(log *slog.Logger) error {
 	flag.Parse()
 
 	app := &api{
-		log:        log,
-		redditrand: redditrandom.New(&http.Client{Timeout: 5 * time.Second}, redditrandom.DefaultSeedURL),
+		log:         log,
+		blueskyrand: blueskyrandom.New(&http.Client{Timeout: 5 * time.Second}, blueskyrandom.DefaultAPIBaseURL),
 	}
 	server := &http.Server{
 		Addr:              *addr,

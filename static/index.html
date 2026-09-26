@@ -26,7 +26,7 @@
     <div class="alert alert-warning" role="alert">
         Normal numbers and strings are pseudorandom. Set <code>secure=true</code> on the
         number or string endpoint to use cryptographic randomness. UUIDv4 values are
-        cryptographically random. Reddit-seeded numbers are deterministic and are
+        cryptographically random. Bluesky-reply-seeded numbers are deterministic and are
         <strong>never</strong> appropriate for secrets.
     </div>
     <BR>
@@ -36,7 +36,7 @@
         <div class="panel-body">
             Requests are GET with URL query parameters. <code>count</code> is 1–100 (default 1).
             <code>max</code> is exclusive. Invalid or repeated documented options return HTTP 400
-            with <code>{"error":"..."}</code>; failed Reddit requests return HTTP 502.
+            with <code>{"error":"..."}</code>; failed Bluesky requests return HTTP 502.
             Errors never return partially generated arrays. Each response includes an
             <code>X-Request-ID</code> header. <code>GET /healthz</code> returns 204 when the server is running.
             <BR><BR>
@@ -100,17 +100,18 @@
     </div>
     <!-- End of Random Number -->
 
-    <!-- Random reddit Number -->
+    <!-- Bluesky Reply-Seeded Number -->
     <div class="panel panel-info">
-        <div class="panel-heading"><B>Get a random number using the reddit comment feed as the seed</B></div>
+        <div class="panel-heading"><B>Get a number seeded from public Bluesky replies</B></div>
         <div class="panel-body">
             <b>URL</b><BR>
-            <a data-api-path="/api/v1.0/randomredditnumber" href="/api/v1.0/randomredditnumber">https://www.randomnumberapi.com/api/v1.0/randomredditnumber</a><BR><BR>
-            <strong>Notes</strong><BR>Each Reddit comment body is hashed into a
-            deterministic pseudorandom seed. Comments may repeat or be predictable;
-            this is not a source of entropy for security-sensitive use. Reddit may
-            rate-limit or reject fetches; a fetch failure returns 502 with no partial array.
-            <code>secure=true</code> is rejected on this endpoint.<BR><BR>
+            <a data-api-path="/api/v1.0/randomblueskynumber" href="/api/v1.0/randomblueskynumber">https://www.randomnumberapi.com/api/v1.0/randomblueskynumber</a><BR><BR>
+            <strong>Notes</strong><BR>Public replies to posts in Bluesky's Discover feed are
+            hashed into deterministic pseudorandom seeds. No account or API key is needed.
+            Reply hashes are cached in memory; another post is fetched after a pool is used.
+            Replies may repeat or be old, so this is not secure randomness.
+            If Bluesky is unavailable, the API returns 502 without a partial array.
+            <code>secure=true</code> is rejected here; use the regular number endpoint instead.<BR><BR>
             <table class="table table-striped">
                 <thead>
                 <tr>
@@ -140,7 +141,7 @@
             </table>
             <b>Example</b><BR>
             <div class="well">
-                <a data-api-path="/api/v1.0/randomredditnumber?min=100&amp;max=1000&amp;count=5" href="/api/v1.0/randomredditnumber?min=100&amp;max=1000&amp;count=5">https://www.randomnumberapi.com/api/v1.0/randomredditnumber?min=100&amp;max=1000&amp;count=5</a>
+                <a data-api-path="/api/v1.0/randomblueskynumber?min=100&amp;max=1000&amp;count=5" href="/api/v1.0/randomblueskynumber?min=100&amp;max=1000&amp;count=5">https://www.randomnumberapi.com/api/v1.0/randomblueskynumber?min=100&amp;max=1000&amp;count=5</a>
             </div>
             <b>Response:</b><BR>
             <div class="well">
@@ -148,7 +149,7 @@
             </div>
         </div>
     </div>
-    <!-- End of Reddit Random Number -->
+    <!-- End of Bluesky Reply-Seeded Number -->
 
     <!-- Random String -->
     <div class="panel panel-info">

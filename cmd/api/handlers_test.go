@@ -10,13 +10,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jameskozlowski/randomnumberapi-go/internal/redditrandom"
+	"github.com/jameskozlowski/randomnumberapi-go/internal/blueskyrandom"
 )
 
 func testApp(seedURL string) *api {
 	return &api{
-		log:        slog.New(slog.NewJSONHandler(io.Discard, nil)),
-		redditrand: redditrandom.New(nil, seedURL),
+		log:         slog.New(slog.NewJSONHandler(io.Discard, nil)),
+		blueskyrand: blueskyrandom.New(nil, seedURL),
 	}
 }
 
@@ -89,32 +89,64 @@ func TestSecureNumbersAndStrings(t *testing.T) {
 	}
 }
 
-func TestRedditFailureDoesNotWritePartialResults(t *testing.T) {
-	var fetches int
+func TestBlueskyNumberEndpoint(t *testing.T) {
 	seedServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fetches++
-		if fetches == 1 {
-			fmt.Fprint(w, `{"data":{"children":[{"data":{"body":"comment"}}]}}`)
-			return
+		switch r.URL.Path {
+		case "/xrpc/app.bsky.feed.getFeed":
+			fmt.Fprint(w, `{"feed":[{"post":{"uri":"at://did:plc:example/app.bsky.feed.post/abc","replyCount":2}}]}`)
+		case "/xrpc/app.bsky.feed.getPostThread":
+			fmt.Fprint(w, `{"thread":{"replies":[{"post":{"uri":"at://did:plc:one/app.bsky.feed.post/one","record":{"text":"first"}}},{"post":{"uri":"at://did:plc:two/app.bsky.feed.post/two","record":{"text":"second"}}}]}}`)
+		default:
+			http.NotFound(w, r)
 		}
-		w.WriteHeader(http.StatusTooManyRequests)
+	}))
+	defer seedServer.Close()
+
+	response := request(t, testApp(seedServer.URL).getRoutes(), "/api/v1.0/randomblueskynumber?min=7&max=8&count=2")
+	var numbers []int
+	if response.Code != http.StatusOK || json.Unmarshal(response.Body.Bytes(), &numbers) != nil || len(numbers) != 2 || numbers[0] != 7 || numbers[1] != 7 {
+		t.Fatalf("Bluesky-seeded response: %d %s", response.Code, response.Body.String())
+	}
+}
+
+func TestBlueskyResponseAndPartialFailure(t *testing.T) {
+	var feeds, threads int
+	seedServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/xrpc/app.bsky.feed.getFeed":
+			feeds++
+			if feeds > 1 {
+				w.WriteHeader(http.StatusTooManyRequests)
+				return
+			}
+			fmt.Fprint(w, `{"feed":[{"post":{"uri":"at://did:plc:example/app.bsky.feed.post/abc","replyCount":1}}]}`)
+		case "/xrpc/app.bsky.feed.getPostThread":
+			threads++
+			fmt.Fprint(w, `{"thread":{"replies":[{"post":{"uri":"at://did:plc:reply/app.bsky.feed.post/xyz","record":{"text":"comment"}}}]}}`)
+		default:
+			http.NotFound(w, r)
+		}
 	}))
 	defer seedServer.Close()
 
 	handler := testApp(seedServer.URL).getRoutes()
-	response := request(t, handler, "/api/v1.0/randomredditnumber?count=2")
+	response := request(t, handler, "/api/v1.0/randomblueskynumber?count=2")
 	var body struct {
 		Error string `json:"error"`
 	}
 	if response.Code != http.StatusBadGateway || json.Unmarshal(response.Body.Bytes(), &body) != nil || body.Error != "Bad Gateway" {
 		t.Fatalf("upstream failure must return JSON error only: %d %s", response.Code, response.Body.String())
 	}
-	if fetches != 2 {
-		t.Fatalf("expected a successful seed and a failed refill, got %d fetches", fetches)
+	if feeds != 2 || threads != 1 {
+		t.Fatalf("expected one seed then a failed refill, got %d feed calls and %d thread calls", feeds, threads)
 	}
-	response = request(t, handler, "/api/v1.0/randomredditnumber?secure=true")
+	response = request(t, handler, "/api/v1.0/randomblueskynumber?secure=true")
 	if response.Code != http.StatusBadRequest {
-		t.Fatalf("Reddit source cannot satisfy secure=true: %d %s", response.Code, response.Body.String())
+		t.Fatalf("Bluesky source cannot satisfy secure=true: %d %s", response.Code, response.Body.String())
+	}
+	response = request(t, handler, "/api/v1.0/randomredditnumber")
+	if response.Code != http.StatusNotFound {
+		t.Fatalf("obsolete Reddit route must not report success: %d %s", response.Code, response.Body.String())
 	}
 }
 

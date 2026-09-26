@@ -92,7 +92,7 @@ func (app *api) randomString(w http.ResponseWriter, r *http.Request) {
 	app.respond(w, r, strings)
 }
 
-func (app *api) randomRedditNumber(w http.ResponseWriter, r *http.Request) {
+func (app *api) randomBlueskyNumber(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	count, err := parseCount(q)
 	if err != nil {
@@ -110,14 +110,14 @@ func (app *api) randomRedditNumber(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if secure {
-		writeError(w, http.StatusBadRequest, "Reddit-seeded numbers cannot be secure")
+		writeError(w, http.StatusBadRequest, "Bluesky-seeded numbers cannot be secure")
 		return
 	}
 	numbers := make([]int, count)
 	for i := range numbers {
-		value, err := app.redditrand.Intn(r.Context(), max-min)
+		value, err := app.blueskyrand.Intn(r.Context(), max-min)
 		if err != nil {
-			app.fail(w, r, http.StatusBadGateway, fmt.Errorf("retrieve Reddit seed: %w", err))
+			app.fail(w, r, http.StatusBadGateway, fmt.Errorf("retrieve Bluesky reply seed: %w", err))
 			return
 		}
 		numbers[i] = min + value
