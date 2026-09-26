@@ -150,6 +150,25 @@ func TestBlueskyResponseAndPartialFailure(t *testing.T) {
 	}
 }
 
+func TestCrossOriginAPIResponses(t *testing.T) {
+	handler := testApp("").getRoutes()
+	for _, test := range []struct {
+		path string
+		want int
+	}{
+		{"/api/v1.0/random", http.StatusOK},
+		{"/api/v1.0/uuid?count=0", http.StatusBadRequest},
+	} {
+		response := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodGet, test.path, nil)
+		req.Header.Set("Origin", "null")
+		handler.ServeHTTP(response, req)
+		if response.Code != test.want || response.Header().Get("Access-Control-Allow-Origin") != "*" {
+			t.Errorf("%s: status=%d, CORS=%q", test.path, response.Code, response.Header().Get("Access-Control-Allow-Origin"))
+		}
+	}
+}
+
 func TestUUIDHealthAndRequestLogging(t *testing.T) {
 	var logs strings.Builder
 	app := &api{log: slog.New(slog.NewJSONHandler(&logs, nil))}

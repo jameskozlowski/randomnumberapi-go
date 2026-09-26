@@ -70,6 +70,7 @@ func (app *api) logRequests(next http.Handler) http.Handler {
 }
 func setSecureHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Content-Security-Policy",
 			"default-src 'self'; style-src 'self' cdn.jsdelivr.net; script-src 'self' cdn.jsdelivr.net; img-src 'self' github.blog;")
 

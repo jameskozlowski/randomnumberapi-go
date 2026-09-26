@@ -37,6 +37,8 @@ just deploy existing-service us-east1
 
 All endpoints use GET (HEAD is also supported). Successful GET calls return a JSON array, including when `count=1`. `count` defaults to 1 and must be 1–100. Each endpoint also accepts a trailing slash. Other methods return 405. Invalid or repeated documented options, or out-of-range values, return HTTP 400 and `{"error":"..."}`; failures generating values return HTTP 500, and Bluesky upstream failures return HTTP 502 with the same JSON error shape. No partially generated array is returned on failure.
 
+Responses include `Access-Control-Allow-Origin: *` so browser pages on other origins (including local files with origin `null`) can read the public API using GET. Use HTTPS for the hosted API; credentialed cross-origin requests are not supported.
+
 | Endpoint | Options | Defaults |
 | --- | --- | --- |
 | `/api/v1.0/random` (`/randomnumber`) | `min` ≥ 0, `max` > `min`, `secure=true/false`, `count` | `min=0`, `max=min+100`, `secure=false` |
