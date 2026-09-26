@@ -1,0 +1,10 @@
+.git
+.github
+.idea
+.DS_Store
+**/.DS_Store
+/api
+*.test
+*.out
+README.md
+go.work

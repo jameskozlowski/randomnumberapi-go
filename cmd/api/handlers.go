@@ -1,125 +1,126 @@
 package main
 
 import (
-	"github.com/google/uuid"
-	"math/rand"
+	"fmt"
 	"net/http"
-	"strconv"
+
+	"github.com/google/uuid"
 )
 
 func (app *api) randomNumber(w http.ResponseWriter, r *http.Request) {
-
-	count, err := strconv.Atoi(r.URL.Query().Get("count"))
-	if err != nil || count < 1 || count > 100 {
-		count = 1
-	}
-
-	min, err := strconv.Atoi(r.URL.Query().Get("min"))
-	if err != nil || min < 0 {
-		min = 0
-	}
-
-	max, err := strconv.Atoi(r.URL.Query().Get("max"))
-	if err != nil || max <= min {
-		max = min + 100
-	}
-
-	var numbers []int
-	for i := 0; i < count; i++ {
-		numbers = append(numbers, rand.Intn(max-min)+min)
-	}
-
-	err = writeJSON(w, numbers)
+	q := r.URL.Query()
+	count, err := parseCount(q)
 	if err != nil {
-		app.log.LogWarn("Unable to serialize JSON object")
-		w.WriteHeader(http.StatusInternalServerError)
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
 	}
+	min, max, err := parseBounds(q, 0, 100, 0)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	secure, err := parseBool(q, "secure")
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	numbers := make([]int, count)
+	for i := range numbers {
+		value, err := randomIntn(max-min, secure)
+		if err != nil {
+			app.serverError(w, r, fmt.Errorf("generate number: %w", err))
+			return
+		}
+		numbers[i] = min + value
+	}
+	app.respond(w, r, numbers)
 }
 
 func (app *api) randomUUID(w http.ResponseWriter, r *http.Request) {
-
-	count, err := strconv.Atoi(r.URL.Query().Get("count"))
-	if err != nil || count < 1 || count > 100 {
-		count = 1
-	}
-
-	var uuids []string
-	for i := 0; i < count; i++ {
-		uuids = append(uuids, uuid.New().String())
-	}
-
-	err = writeJSON(w, uuids)
+	count, err := parseCount(r.URL.Query())
 	if err != nil {
-		app.log.LogWarn("Unable to serialize JSON object")
-		w.WriteHeader(http.StatusInternalServerError)
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
 	}
+	uuids := make([]string, count)
+	for i := range uuids {
+		value, err := uuid.NewRandom()
+		if err != nil {
+			app.serverError(w, r, fmt.Errorf("generate UUID: %w", err))
+			return
+		}
+		uuids[i] = value.String()
+	}
+	app.respond(w, r, uuids)
 }
 
 func (app *api) randomString(w http.ResponseWriter, r *http.Request) {
-
-	count, err := strconv.Atoi(r.URL.Query().Get("count"))
-	if err != nil || count < 1 || count > 100 {
-		count = 1
-	}
-
-	min, err := strconv.Atoi(r.URL.Query().Get("min"))
-	if err != nil || min < 0 || min > 1000 {
-		min = 10
-	}
-
-	max, err := strconv.Atoi(r.URL.Query().Get("max"))
-	if err != nil || max <= min || max > 1000 {
-		max = min + 10
-	}
-
-	all, err := strconv.ParseBool(r.URL.Query().Get("all"))
+	q := r.URL.Query()
+	count, err := parseCount(q)
 	if err != nil {
-		all = false
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
 	}
-
-	var strings []string
-	for i := 0; i < count; i++ {
-		strings = append(strings, generateString(rand.Intn(max-min)+min, all))
-	}
-
-	err = writeJSON(w, strings)
+	min, max, err := parseBounds(q, 10, 10, 1001)
 	if err != nil {
-		app.log.LogWarn("Unable to serialize JSON object")
-		w.WriteHeader(http.StatusInternalServerError)
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
 	}
+	all, err := parseBool(q, "all")
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	secure, err := parseBool(q, "secure")
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	strings := make([]string, count)
+	for i := range strings {
+		length, err := randomIntn(max-min, secure)
+		if err != nil {
+			app.serverError(w, r, fmt.Errorf("generate string length: %w", err))
+			return
+		}
+		strings[i], err = generateString(length+min, all, secure)
+		if err != nil {
+			app.serverError(w, r, fmt.Errorf("generate string: %w", err))
+			return
+		}
+	}
+	app.respond(w, r, strings)
 }
 
-func (app *api) randomRedditNumber(w http.ResponseWriter, r *http.Request) {
-
-	count, err := strconv.Atoi(r.URL.Query().Get("count"))
-	if err != nil || count < 1 || count > 100 {
-		count = 1
-	}
-
-	min, err := strconv.Atoi(r.URL.Query().Get("min"))
-	if err != nil || min < 0 {
-		min = 0
-	}
-
-	max, err := strconv.Atoi(r.URL.Query().Get("max"))
-	if err != nil || max <= min {
-		max = min + 100
-	}
-
-	var numbers []int
-	for i := 0; i < count; i++ {
-		rr, err := app.redditrand.Intn(max - min)
-		if err != nil {
-			app.log.LogErrorMessage("Unable to get reddit random")
-			app.log.LogError(err)
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-		numbers = append(numbers, rr+min)
-	}
-
-	err = writeJSON(w, numbers)
+func (app *api) randomBlueskyNumber(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	count, err := parseCount(q)
 	if err != nil {
-		app.log.LogWarn("Unable to serialize JSON object")
-		w.WriteHeader(http.StatusInternalServerError)
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
 	}
+	min, max, err := parseBounds(q, 0, 100, 0)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	secure, err := parseBool(q, "secure")
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	if secure {
+		writeError(w, http.StatusBadRequest, "Bluesky-seeded numbers cannot be secure")
+		return
+	}
+	numbers := make([]int, count)
+	for i := range numbers {
+		value, err := app.blueskyrand.Intn(r.Context(), max-min)
+		if err != nil {
+			app.fail(w, r, http.StatusBadGateway, fmt.Errorf("retrieve Bluesky reply seed: %w", err))
+			return
+		}
+		numbers[i] = min + value
+	}
+	app.respond(w, r, numbers)
 }

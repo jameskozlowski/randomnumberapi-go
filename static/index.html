@@ -20,29 +20,31 @@
     <BR><BR>
     <h1>Random Number API</h1>
     <BR><BR>
-    This is a simple api to generate random numbers, random strings and UUID's. This project was built using GO and
-    an be found on <a href="https://github.com/jameskozlowski/randomnumberapi-go">github</a>
+    Generate numbers, strings, and UUIDv4 values with this Go API.
+    Source: <a href="https://github.com/jameskozlowski/randomnumberapi-go">GitHub</a>.
     <BR><BR>
-    <div class="alert alert-danger" role="alert">
-        <B>Warnning: </b>
-        This API uses GO's random functions.
-        The Reddit random function <strong>does</strong> use the GO random function seeded by reddit comments.
-        <BR>This has not been tested for and should not be used for secure cryptographic purposes
+    <div class="alert alert-warning" role="alert">
+        Normal numbers and strings are pseudorandom. Set <code>secure=true</code> on the
+        number or string endpoint to use cryptographic randomness. UUIDv4 values are
+        cryptographically random. Bluesky-reply-seeded numbers are deterministic and are
+        <strong>never</strong> appropriate for secrets.
     </div>
     <BR>
 
     <div class="panel panel-success">
         <div class="panel-heading"><B>Request format</B></div>
         <div class="panel-body">
-            All requests are GET requests.<BR>
-            Options should be set using url parameters
+            Requests are GET with URL query parameters. <code>count</code> is 1–100 (default 1).
+            <code>max</code> is exclusive. Invalid or repeated documented options return HTTP 400
+            with <code>{"error":"..."}</code>; failed Bluesky requests return HTTP 502.
+            Errors never return partially generated arrays. Each response includes an
+            <code>X-Request-ID</code> header. <code>GET /healthz</code> returns 204 when the server is running.
             <BR><BR>
             <B>CURL</B>
             <div class="well">
-                curl "http://www.randomnumberapi.com/api/v1.0/random?min=100&max=1000&count=5"
+                curl "<a data-api-path="/api/v1.0/random?min=100&amp;max=1000&amp;count=5&amp;secure=true" href="/api/v1.0/random?min=100&amp;max=1000&amp;count=5&amp;secure=true">https://www.randomnumberapi.com/api/v1.0/random?min=100&amp;max=1000&amp;count=5&amp;secure=true</a>"
             </div>
-            <b>Response:</b>
-            <div class="well">[684, 434, 864, 261, 375]</div>
+            <p>Previously invalid options silently used defaults; they now return 400 on v1.0 routes.</p>
         </div>
     </div>
 
@@ -51,8 +53,8 @@
         <div class="panel-heading"><B>Get a random number</B></div>
         <div class="panel-body">
             <b>URL</b><BR>
-            http://www.randomnumberapi.com/api/v1.0/random<BR>
-            http://www.randomnumberapi.com/api/v1.0/randomnumber<BR><BR>
+            <a data-api-path="/api/v1.0/random" href="/api/v1.0/random">https://www.randomnumberapi.com/api/v1.0/random</a><BR>
+            <a data-api-path="/api/v1.0/randomnumber" href="/api/v1.0/randomnumber">https://www.randomnumberapi.com/api/v1.0/randomnumber</a><BR><BR>
 
             <table class="table table-striped">
                 <thead>
@@ -65,25 +67,30 @@
                 <tbody>
                 <tr>
                     <th scope="row">min</th>
-                    <td>the minumum random number</td>
+                    <td>Inclusive minimum, at least 0</td>
                     <td>0</td>
                 </tr>
                 <tr>
                     <th scope="row">max</th>
-                    <td>the maximum random number</td>
-                    <td>100</td>
+                    <td>Exclusive maximum, greater than min</td>
+                    <td>min + 100</td>
                 </tr>
                 <tr>
                     <th scope="row">count</th>
-                    <td>the number of random numbers to generate (Maximum of 100)</td>
+                    <td>1 to 100 numbers</td>
                     <td>1</td>
+                </tr>
+                <tr>
+                    <th scope="row">secure</th>
+                    <td>Use cryptographic randomness (true/false)</td>
+                    <td>false</td>
                 </tr>
                 </tbody>
 
             </table>
             <b>Example</b><BR>
             <div class="well">
-                http://www.randomnumberapi.com/api/v1.0/random?min=100&max=1000&count=5
+                <a data-api-path="/api/v1.0/random?min=100&amp;max=1000&amp;count=5&amp;secure=true" href="/api/v1.0/random?min=100&amp;max=1000&amp;count=5&amp;secure=true">https://www.randomnumberapi.com/api/v1.0/random?min=100&amp;max=1000&amp;count=5&amp;secure=true</a>
             </div>
             <b>Response:</b><BR>
             <div class="well">
@@ -93,16 +100,18 @@
     </div>
     <!-- End of Random Number -->
 
-    <!-- Random reddit Number -->
+    <!-- Bluesky Reply-Seeded Number -->
     <div class="panel panel-info">
-        <div class="panel-heading"><B>Get a random number using the reddit comment feed as the seed</B></div>
+        <div class="panel-heading"><B>Get a number seeded from public Bluesky replies</B></div>
         <div class="panel-body">
             <b>URL</b><BR>
-            http://www.randomnumberapi.com/api/v1.0/randomredditnumber<BR><BR>
-            <strong>Notes</strong><BR>This function uses the latest comments submitted to reddit as the seed for each number.
-            So if you request 100 numbers 100 seeds will be generated from comments and a unique seed used for each number.
-            The Idea behind this function is to generate random numbersbased on the "Free Will" of people generating
-            truly random numbers.<BR><BR>
+            <a data-api-path="/api/v1.0/randomblueskynumber" href="/api/v1.0/randomblueskynumber">https://www.randomnumberapi.com/api/v1.0/randomblueskynumber</a><BR><BR>
+            <strong>Notes</strong><BR>Public replies to posts in Bluesky's Discover feed are
+            hashed into deterministic pseudorandom seeds. No account or API key is needed.
+            Reply hashes are cached in memory; another post is fetched after a pool is used.
+            Replies may repeat or be old, so this is not secure randomness.
+            If Bluesky is unavailable, the API returns 502 without a partial array.
+            <code>secure=true</code> is rejected here; use the regular number endpoint instead.<BR><BR>
             <table class="table table-striped">
                 <thead>
                 <tr>
@@ -114,17 +123,17 @@
                 <tbody>
                 <tr>
                     <th scope="row">min</th>
-                    <td>the minumum random number</td>
+                    <td>Inclusive minimum, at least 0</td>
                     <td>0</td>
                 </tr>
                 <tr>
                     <th scope="row">max</th>
-                    <td>the maximum random number</td>
-                    <td>100</td>
+                    <td>Exclusive maximum, greater than min</td>
+                    <td>min + 100</td>
                 </tr>
                 <tr>
                     <th scope="row">count</th>
-                    <td>the number of random numbers to generate (Maximum of 100)</td>
+                    <td>1 to 100 numbers</td>
                     <td>1</td>
                 </tr>
                 </tbody>
@@ -132,7 +141,7 @@
             </table>
             <b>Example</b><BR>
             <div class="well">
-                http://www.randomnumberapi.com/api/v1.0/randomredditnumber?min=100&max=1000&count=5
+                <a data-api-path="/api/v1.0/randomblueskynumber?min=100&amp;max=1000&amp;count=5" href="/api/v1.0/randomblueskynumber?min=100&amp;max=1000&amp;count=5">https://www.randomnumberapi.com/api/v1.0/randomblueskynumber?min=100&amp;max=1000&amp;count=5</a>
             </div>
             <b>Response:</b><BR>
             <div class="well">
@@ -140,14 +149,14 @@
             </div>
         </div>
     </div>
-    <!-- End of Reddit Random Number -->
+    <!-- End of Bluesky Reply-Seeded Number -->
 
     <!-- Random String -->
     <div class="panel panel-info">
         <div class="panel-heading"><B>Get a random string</B></div>
         <div class="panel-body">
             <b>URL</b><BR>
-            http://www.randomnumberapi.com/api/v1.0/randomstring<BR><BR>
+            <a data-api-path="/api/v1.0/randomstring" href="/api/v1.0/randomstring">https://www.randomnumberapi.com/api/v1.0/randomstring</a><BR><BR>
 
             <table class="table table-striped">
                 <thead>
@@ -160,30 +169,35 @@
                 <tbody>
                 <tr>
                     <th scope="row">min</th>
-                    <td>the minumum number of chars in the string (Max 1000)</td>
+                    <td>Inclusive minimum length, 0 to 1000</td>
                     <td>10</td>
                 </tr>
                 <tr>
                     <th scope="row">max</th>
-                    <td>the maximum number of chars in the string (Max 1000)</td>
+                    <td>Exclusive maximum length, at most 1001 (allows length 1000)</td>
                     <td>20</td>
                 </tr>
                 <tr>
                     <th scope="row">count</th>
-                    <td>the number of random strings to generate (Maximum of 100)</td>
+                    <td>1 to 100 strings</td>
                     <td>1</td>
                 </tr>
                 <tr>
                     <th scope="row">all</th>
-                    <td>Include numbers and symbols (True/False)</td>
+                    <td>Include digits and symbols (true/false)</td>
                     <td>False</td>
+                </tr>
+                <tr>
+                    <th scope="row">secure</th>
+                    <td>Use cryptographic randomness for lengths and characters (true/false)</td>
+                    <td>false</td>
                 </tr>
                 </tbody>
 
             </table>
             <b>Example</b><BR>
             <div class="well">
-                http://www.randomnumberapi.com/api/v1.0/randomstring?min=5&max=20&count=5
+                <a data-api-path="/api/v1.0/randomstring?min=5&amp;max=20&amp;count=5&amp;secure=true" href="/api/v1.0/randomstring?min=5&amp;max=20&amp;count=5&amp;secure=true">https://www.randomnumberapi.com/api/v1.0/randomstring?min=5&amp;max=20&amp;count=5&amp;secure=true</a>
             </div>
             <b>Response:</b><BR>
             <div class="well">
@@ -198,8 +212,8 @@
         <div class="panel-heading"><B>Get a random UUID</B></div>
         <div class="panel-body">
             <b>URL</b><BR>
-            http://www.randomnumberapi.com/api/v1.0/uuid<BR>
-            http://www.randomnumberapi.com/api/v1.0/randomuuid<BR><BR>
+            <a data-api-path="/api/v1.0/uuid" href="/api/v1.0/uuid">https://www.randomnumberapi.com/api/v1.0/uuid</a><BR>
+            <a data-api-path="/api/v1.0/randomuuid" href="/api/v1.0/randomuuid">https://www.randomnumberapi.com/api/v1.0/randomuuid</a><BR><BR>
 
             <table class="table table-striped">
                 <thead>
@@ -212,7 +226,7 @@
                 <tbody>
                 <tr>
                     <th scope="row">count</th>
-                    <td>the number of random numbers to generate (Maximum of 100)</td>
+                    <td>1 to 100 cryptographically random UUIDv4 values</td>
                     <td>1</td>
                 </tr>
                 </tbody>
@@ -220,11 +234,11 @@
             </table>
             <b>Example</b><BR>
             <div class="well">
-                www.randomnumberapi.com/api/v1.0/uuid?count=2
+                <a data-api-path="/api/v1.0/uuid?count=2" href="/api/v1.0/uuid?count=2">https://www.randomnumberapi.com/api/v1.0/uuid?count=2</a>
             </div>
             <b>Response:</b><BR>
             <div class="well">
-                ["333d69ac79cf455abaf1c7eeb76327bb", "7087d9a779e84df19b06c37202bc285d"]
+                ["333d69ac-79cf-455a-baf1-c7eeb76327bb", "7087d9a7-79e8-4df1-9b06-c37202bc285d"]
             </div>
         </div>
     </div>
@@ -237,5 +251,6 @@
     <BR><BR>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+<script src="apipage.js" defer></script>
 </body>
 </html>
