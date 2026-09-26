@@ -1,20 +1,18 @@
-FROM golang:1.20.5
-LABEL authors="jameskozlowski"
-# Set destination for COPY
-WORKDIR /app
+FROM golang:1.27.1@sha256:3680233e3204827fbdc66088528ae6d4b3d034f51d03a99d454f6de034888244 AS build
 
-# Download Go modules
-COPY ./go.mod ./go.sum ./
+WORKDIR /app
+COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy the source code.
-COPY ./ ./
+COPY cmd/ ./cmd/
+COPY internal/ ./internal/
+RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /app/api ./cmd/api
 
-# Build
-RUN go build ./cmd/api
+FROM gcr.io/distroless/static-debian12:nonroot@sha256:afa5c872c891853ca7fcf1f12c3edb23f7eeef36189728842dd51042ff57f7ab
+WORKDIR /app
+COPY --from=build /app/api ./api
+COPY static/ ./static/
 
-# expose port
+USER 65532:65532
 EXPOSE 4000
-
-# Run
-CMD ["./api"]
+ENTRYPOINT ["/app/api"]
